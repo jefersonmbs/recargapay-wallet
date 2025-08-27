@@ -21,9 +21,7 @@ public interface UserService {
 
     void deleteUser(UUID id);
 
-    void deactivateUser(UUID id);
-
-    void activateUser(UUID id);
+    void toggleActiveUser(UUID id);
 
     List<UserResponseDto> searchUsersByName(String name);
 
