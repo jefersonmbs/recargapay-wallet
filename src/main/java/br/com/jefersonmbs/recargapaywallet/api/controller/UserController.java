@@ -132,37 +132,20 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Desativar usuário", description = "Desativa um usuário sem removê-lo do sistema")
+    @Operation(summary = "Alternar status ativo do usuário", description = "Alterna o status ativo/inativo de um usuário")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Usuário desativado com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Status do usuário alterado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Usuário não encontrado",
                     content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor",
                     content = @Content(mediaType = "application/json"))
     })
-    @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivateUser(
+    @PatchMapping("/{id}/toggle-active")
+    public ResponseEntity<Void> toggleActiveUser(
             @Parameter(description = "ID do usuário", required = true) @PathVariable UUID id) {
-        log.info("REST request to deactivate user with ID: {}", id);
+        log.info("REST request to toggle active status for user with ID: {}", id);
         
-        userService.deactivateUser(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Ativar usuário", description = "Ativa um usuário previamente desativado")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Usuário ativado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Usuário não encontrado",
-                    content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor",
-                    content = @Content(mediaType = "application/json"))
-    })
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<Void> activateUser(
-            @Parameter(description = "ID do usuário", required = true) @PathVariable UUID id) {
-        log.info("REST request to activate user with ID: {}", id);
-        
-        userService.activateUser(id);
+        userService.toggleActiveUser(id);
         return ResponseEntity.noContent().build();
     }
 

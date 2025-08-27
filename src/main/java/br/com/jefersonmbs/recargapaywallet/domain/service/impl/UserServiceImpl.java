@@ -107,29 +107,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deactivateUser(UUID id) {
-        log.info("Deactivating user with ID: {}", id);
+    public void toggleActiveUser(UUID id) {
+        log.info("Toggling active status for user with ID: {}", id);
         
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
         
-        userEntity.setActive(false);
+        userEntity.setActive(!userEntity.getActive());
         userRepository.save(userEntity);
         
-        log.info("User deactivated successfully with ID: {}", id);
-    }
-
-    @Override
-    public void activateUser(UUID id) {
-        log.info("Activating user with ID: {}", id);
-        
-        UserEntity userEntity = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
-        
-        userEntity.setActive(true);
-        userRepository.save(userEntity);
-        
-        log.info("User activated successfully with ID: {}", id);
+        log.info("User active status toggled successfully with ID: {} - new status: {}", id, userEntity.getActive());
     }
 
     @Override

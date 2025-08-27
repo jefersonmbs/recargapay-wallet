@@ -244,26 +244,41 @@ class UserEntityServiceImplTest {
     }
 
     @Test
-    void deactivateUser_ShouldDeactivateUser_WhenUserExists() {
+    void toggleActiveUser_ShouldToggleToInactive_WhenUserIsActive() {
+        testUserEntity.setActive(true);
         when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUserEntity));
         when(userRepository.save(any(UserEntity.class))).thenReturn(testUserEntity);
 
-        userService.deactivateUser(testUserId);
+        userService.toggleActiveUser(testUserId);
 
+        assertThat(testUserEntity.getActive()).isFalse();
         verify(userRepository).findById(testUserId);
         verify(userRepository).save(any(UserEntity.class));
     }
 
     @Test
-    void activateUser_ShouldActivateUser_WhenUserExists() {
+    void toggleActiveUser_ShouldToggleToActive_WhenUserIsInactive() {
         testUserEntity.setActive(false);
         when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUserEntity));
         when(userRepository.save(any(UserEntity.class))).thenReturn(testUserEntity);
 
-        userService.activateUser(testUserId);
+        userService.toggleActiveUser(testUserId);
 
+        assertThat(testUserEntity.getActive()).isTrue();
         verify(userRepository).findById(testUserId);
         verify(userRepository).save(any(UserEntity.class));
+    }
+
+    @Test
+    void toggleActiveUser_ShouldThrowException_WhenUserNotFound() {
+        when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.toggleActiveUser(testUserId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("User not found");
+
+        verify(userRepository).findById(testUserId);
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test

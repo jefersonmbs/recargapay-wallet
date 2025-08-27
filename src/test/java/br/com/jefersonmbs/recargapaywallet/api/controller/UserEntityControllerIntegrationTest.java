@@ -214,17 +214,6 @@ class UserEntityControllerIntegrationTest {
                 .andExpect(status().isNoContent());
     }
 
-    @Test
-    void deactivateUser_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(patch("/api/v1/users/{id}/deactivate", testUserId))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void activateUser_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(patch("/api/v1/users/{id}/activate", testUserId))
-                .andExpect(status().isNoContent());
-    }
 
     @Test
     void checkEmailExists_ShouldReturnTrue_WhenEmailExists() throws Exception {
