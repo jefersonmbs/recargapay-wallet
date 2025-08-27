@@ -3,7 +3,7 @@ package br.com.jefersonmbs.recargapaywallet.api.mapper;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserCreateDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserResponseDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserUpdateDto;
-import br.com.jefersonmbs.recargapaywallet.domain.entity.User;
+import br.com.jefersonmbs.recargapaywallet.domain.entity.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -16,12 +16,12 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "active", constant = "true")
-    User toEntity(UserCreateDto userCreateDto);
+    UserEntity toEntity(UserCreateDto userCreateDto);
 
-    UserResponseDto toResponseDto(User user);
+    UserResponseDto toResponseDto(UserEntity userEntity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void updateUserFromDto(UserUpdateDto userUpdateDto, @MappingTarget User user);
+    void updateUserFromDto(UserUpdateDto userUpdateDto, @MappingTarget UserEntity userEntity);
 }

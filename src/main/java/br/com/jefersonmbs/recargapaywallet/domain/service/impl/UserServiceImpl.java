@@ -4,7 +4,7 @@ import br.com.jefersonmbs.recargapaywallet.api.dto.UserCreateDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserResponseDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserUpdateDto;
 import br.com.jefersonmbs.recargapaywallet.api.mapper.UserMapper;
-import br.com.jefersonmbs.recargapaywallet.domain.entity.User;
+import br.com.jefersonmbs.recargapaywallet.domain.entity.UserEntity;
 import br.com.jefersonmbs.recargapaywallet.domain.repository.UserRepository;
 import br.com.jefersonmbs.recargapaywallet.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +33,12 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("User with email " + userCreateDto.getEmail() + " already exists");
         }
 
-        User user = userMapper.toEntity(userCreateDto);
+        UserEntity userEntity = userMapper.toEntity(userCreateDto);
 
-        User savedUser = userRepository.save(user);
-        log.info("User created successfully with ID: {}", savedUser.getId());
+        UserEntity savedUserEntity = userRepository.save(userEntity);
+        log.info("User created successfully with ID: {}", savedUserEntity.getId());
         
-        return userMapper.toResponseDto(savedUser);
+        return userMapper.toResponseDto(savedUserEntity);
     }
 
     @Override
@@ -46,10 +46,10 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto getUserById(UUID id) {
         log.info("Fetching user with ID: {}", id);
         
-        User user = userRepository.findById(id)
+        UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
         
-        return userMapper.toResponseDto(user);
+        return userMapper.toResponseDto(userEntity);
     }
 
     @Override
@@ -78,20 +78,20 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto updateUser(UUID id, UserUpdateDto userUpdateDto) {
         log.info("Updating user with ID: {}", id);
         
-        User existingUser = userRepository.findById(id)
+        UserEntity existingUserEntity = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
 
         if (userUpdateDto.getEmail() != null &&
-            !userUpdateDto.getEmail().equals(existingUser.getEmail()) &&
+            !userUpdateDto.getEmail().equals(existingUserEntity.getEmail()) &&
             userRepository.existsByEmail(userUpdateDto.getEmail())) {
             throw new IllegalArgumentException("User with email " + userUpdateDto.getEmail() + " already exists");
         }
 
-        userMapper.updateUserFromDto(userUpdateDto, existingUser);
-        User updatedUser = userRepository.save(existingUser);
+        userMapper.updateUserFromDto(userUpdateDto, existingUserEntity);
+        UserEntity updatedUserEntity = userRepository.save(existingUserEntity);
         
-        log.info("User updated successfully with ID: {}", updatedUser.getId());
-        return userMapper.toResponseDto(updatedUser);
+        log.info("User updated successfully with ID: {}", updatedUserEntity.getId());
+        return userMapper.toResponseDto(updatedUserEntity);
     }
 
     @Override
@@ -110,11 +110,11 @@ public class UserServiceImpl implements UserService {
     public void deactivateUser(UUID id) {
         log.info("Deactivating user with ID: {}", id);
         
-        User user = userRepository.findById(id)
+        UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
         
-        user.setActive(false);
-        userRepository.save(user);
+        userEntity.setActive(false);
+        userRepository.save(userEntity);
         
         log.info("User deactivated successfully with ID: {}", id);
     }
@@ -123,11 +123,11 @@ public class UserServiceImpl implements UserService {
     public void activateUser(UUID id) {
         log.info("Activating user with ID: {}", id);
         
-        User user = userRepository.findById(id)
+        UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
         
-        user.setActive(true);
-        userRepository.save(user);
+        userEntity.setActive(true);
+        userRepository.save(userEntity);
         
         log.info("User activated successfully with ID: {}", id);
     }

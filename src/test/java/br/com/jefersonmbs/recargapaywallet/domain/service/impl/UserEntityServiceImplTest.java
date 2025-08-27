@@ -4,7 +4,7 @@ import br.com.jefersonmbs.recargapaywallet.api.dto.UserCreateDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserResponseDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserUpdateDto;
 import br.com.jefersonmbs.recargapaywallet.api.mapper.UserMapper;
-import br.com.jefersonmbs.recargapaywallet.domain.entity.User;
+import br.com.jefersonmbs.recargapaywallet.domain.entity.UserEntity;
 import br.com.jefersonmbs.recargapaywallet.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+class UserEntityServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -34,7 +34,7 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-    private User testUser;
+    private UserEntity testUserEntity;
     private UserCreateDto userCreateDto;
     private UserUpdateDto userUpdateDto;
     private UUID testUserId;
@@ -43,7 +43,7 @@ class UserServiceImplTest {
     void setUp() {
         testUserId = UUID.randomUUID();
         
-        testUser = User.builder()
+        testUserEntity = UserEntity.builder()
                 .id(testUserId)
                 .name("Carlos Silva")
                 .email("carlos.silva@example.com")
@@ -78,9 +78,9 @@ class UserServiceImplTest {
                 .build();
 
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
-        when(userMapper.toEntity(any(UserCreateDto.class))).thenReturn(testUser);
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
-        when(userMapper.toResponseDto(any(User.class))).thenReturn(expectedResponse);
+        when(userMapper.toEntity(any(UserCreateDto.class))).thenReturn(testUserEntity);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(testUserEntity);
+        when(userMapper.toResponseDto(any(UserEntity.class))).thenReturn(expectedResponse);
 
         UserResponseDto result = userService.createUser(userCreateDto);
 
@@ -90,8 +90,8 @@ class UserServiceImplTest {
         assertThat(result.getActive()).isTrue();
         verify(userRepository).existsByEmail("carlos.silva@example.com");
         verify(userMapper).toEntity(userCreateDto);
-        verify(userRepository).save(any(User.class));
-        verify(userMapper).toResponseDto(testUser);
+        verify(userRepository).save(any(UserEntity.class));
+        verify(userMapper).toResponseDto(testUserEntity);
     }
 
     @Test
@@ -103,7 +103,7 @@ class UserServiceImplTest {
                 .hasMessageContaining("already exists");
 
         verify(userRepository).existsByEmail("carlos.silva@example.com");
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -116,8 +116,8 @@ class UserServiceImplTest {
                 .active(true)
                 .build();
 
-        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-        when(userMapper.toResponseDto(testUser)).thenReturn(expectedResponse);
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUserEntity));
+        when(userMapper.toResponseDto(testUserEntity)).thenReturn(expectedResponse);
 
         UserResponseDto result = userService.getUserById(testUserId);
 
@@ -125,7 +125,7 @@ class UserServiceImplTest {
         assertThat(result.getId()).isEqualTo(testUserId);
         assertThat(result.getName()).isEqualTo("Carlos Silva");
         verify(userRepository).findById(testUserId);
-        verify(userMapper).toResponseDto(testUser);
+        verify(userMapper).toResponseDto(testUserEntity);
     }
 
     @Test
@@ -143,7 +143,7 @@ class UserServiceImplTest {
 
     @Test
     void getAllUsers_ShouldReturnAllUsers() {
-        List<User> users = Collections.singletonList(testUser);
+        List<UserEntity> userEntities = Collections.singletonList(testUserEntity);
         UserResponseDto expectedResponse = UserResponseDto.builder()
                 .id(testUserId)
                 .name("Carlos Silva")
@@ -152,20 +152,20 @@ class UserServiceImplTest {
                 .active(true)
                 .build();
 
-        when(userRepository.findAll()).thenReturn(users);
-        when(userMapper.toResponseDto(testUser)).thenReturn(expectedResponse);
+        when(userRepository.findAll()).thenReturn(userEntities);
+        when(userMapper.toResponseDto(testUserEntity)).thenReturn(expectedResponse);
 
         List<UserResponseDto> result = userService.getAllUsers();
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getName()).isEqualTo("Carlos Silva");
         verify(userRepository).findAll();
-        verify(userMapper).toResponseDto(testUser);
+        verify(userMapper).toResponseDto(testUserEntity);
     }
 
     @Test
     void getAllActiveUsers_ShouldReturnOnlyActiveUsers() {
-        List<User> activeUsers = Collections.singletonList(testUser);
+        List<UserEntity> activeUserEntities = Collections.singletonList(testUserEntity);
         UserResponseDto expectedResponse = UserResponseDto.builder()
                 .id(testUserId)
                 .name("Carlos Silva")
@@ -174,15 +174,15 @@ class UserServiceImplTest {
                 .active(true)
                 .build();
 
-        when(userRepository.findAllActive()).thenReturn(activeUsers);
-        when(userMapper.toResponseDto(testUser)).thenReturn(expectedResponse);
+        when(userRepository.findAllActive()).thenReturn(activeUserEntities);
+        when(userMapper.toResponseDto(testUserEntity)).thenReturn(expectedResponse);
 
         List<UserResponseDto> result = userService.getAllActiveUsers();
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getActive()).isTrue();
         verify(userRepository).findAllActive();
-        verify(userMapper).toResponseDto(testUser);
+        verify(userMapper).toResponseDto(testUserEntity);
     }
 
     @Test
@@ -195,18 +195,18 @@ class UserServiceImplTest {
                 .active(true)
                 .build();
 
-        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUserEntity));
         when(userRepository.existsByEmail("ana.santos@example.com")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
-        when(userMapper.toResponseDto(testUser)).thenReturn(expectedResponse);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(testUserEntity);
+        when(userMapper.toResponseDto(testUserEntity)).thenReturn(expectedResponse);
 
         UserResponseDto result = userService.updateUser(testUserId, userUpdateDto);
 
         assertThat(result).isNotNull();
         verify(userRepository).findById(testUserId);
-        verify(userMapper).updateUserFromDto(userUpdateDto, testUser);
-        verify(userRepository).save(any(User.class));
-        verify(userMapper).toResponseDto(testUser);
+        verify(userMapper).updateUserFromDto(userUpdateDto, testUserEntity);
+        verify(userRepository).save(any(UserEntity.class));
+        verify(userMapper).toResponseDto(testUserEntity);
     }
 
     @Test
@@ -218,7 +218,7 @@ class UserServiceImplTest {
                 .hasMessageContaining("User not found");
 
         verify(userRepository).findById(testUserId);
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).save(any(UserEntity.class));
     }
 
     @Test
@@ -245,30 +245,30 @@ class UserServiceImplTest {
 
     @Test
     void deactivateUser_ShouldDeactivateUser_WhenUserExists() {
-        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUserEntity));
+        when(userRepository.save(any(UserEntity.class))).thenReturn(testUserEntity);
 
         userService.deactivateUser(testUserId);
 
         verify(userRepository).findById(testUserId);
-        verify(userRepository).save(any(User.class));
+        verify(userRepository).save(any(UserEntity.class));
     }
 
     @Test
     void activateUser_ShouldActivateUser_WhenUserExists() {
-        testUser.setActive(false);
-        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        testUserEntity.setActive(false);
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUserEntity));
+        when(userRepository.save(any(UserEntity.class))).thenReturn(testUserEntity);
 
         userService.activateUser(testUserId);
 
         verify(userRepository).findById(testUserId);
-        verify(userRepository).save(any(User.class));
+        verify(userRepository).save(any(UserEntity.class));
     }
 
     @Test
     void searchUsersByName_ShouldReturnMatchingUsers() {
-        List<User> matchingUsers = Collections.singletonList(testUser);
+        List<UserEntity> matchingUserEntities = Collections.singletonList(testUserEntity);
         UserResponseDto expectedResponse = UserResponseDto.builder()
                 .id(testUserId)
                 .name("Carlos Silva")
@@ -277,15 +277,15 @@ class UserServiceImplTest {
                 .active(true)
                 .build();
 
-        when(userRepository.findActiveByNameContainingIgnoreCase("Carlos")).thenReturn(matchingUsers);
-        when(userMapper.toResponseDto(testUser)).thenReturn(expectedResponse);
+        when(userRepository.findActiveByNameContainingIgnoreCase("Carlos")).thenReturn(matchingUserEntities);
+        when(userMapper.toResponseDto(testUserEntity)).thenReturn(expectedResponse);
 
         List<UserResponseDto> result = userService.searchUsersByName("Carlos");
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getName()).contains("Carlos");
         verify(userRepository).findActiveByNameContainingIgnoreCase("Carlos");
-        verify(userMapper).toResponseDto(testUser);
+        verify(userMapper).toResponseDto(testUserEntity);
     }
 
     @Test
