@@ -16,7 +16,6 @@ import br.com.jefersonmbs.recargapaywallet.domain.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,7 +36,7 @@ class UserEntityControllerIntegrationTest {
     @MockitoBean
     private UserService userService;
 
-    private final UUID testUserId = UUID.randomUUID();
+    private final Long testUserId = 1L;
 
     @Test
     void createUser_ShouldReturnCreated_WhenValidInput() throws Exception {
@@ -45,6 +44,7 @@ class UserEntityControllerIntegrationTest {
                 .name("Carlos Silva")
                 .email("carlos.silva@example.com")
                 .phone("11987654321")
+                .cpf("11111111111")
                 .build();
 
         UserResponseDto responseDto = UserResponseDto.builder()
@@ -52,6 +52,7 @@ class UserEntityControllerIntegrationTest {
                 .name("Carlos Silva")
                 .email("carlos.silva@example.com")
                 .phone("11987654321")
+                .cpf("11111111111")
                 .active(true)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -65,7 +66,8 @@ class UserEntityControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Carlos Silva"))
                 .andExpect(jsonPath("$.email").value("carlos.silva@example.com"))
-                .andExpect(jsonPath("$.active").value(true));
+                .andExpect(jsonPath("$.active").value(true))
+                .andExpect(jsonPath("$.cpf").value("11111111111"));
     }
 
     @Test
@@ -97,7 +99,7 @@ class UserEntityControllerIntegrationTest {
 
         mockMvc.perform(get("/api/v1/users/{id}", testUserId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testUserId.toString()))
+                .andExpect(jsonPath("$.id").value(testUserId))
                 .andExpect(jsonPath("$.name").value("Carlos Silva"));
     }
 
@@ -186,7 +188,7 @@ class UserEntityControllerIntegrationTest {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        when(userService.updateUser(any(UUID.class), any(UserUpdateDto.class))).thenReturn(responseDto);
+        when(userService.updateUser(any(Long.class), any(UserUpdateDto.class))).thenReturn(responseDto);
 
         mockMvc.perform(put("/api/v1/users/{id}", testUserId)
                         .contentType(MediaType.APPLICATION_JSON)

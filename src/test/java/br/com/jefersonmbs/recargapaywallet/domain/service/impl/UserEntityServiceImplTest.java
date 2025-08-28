@@ -37,11 +37,11 @@ class UserEntityServiceImplTest {
     private UserEntity testUserEntity;
     private UserCreateDto userCreateDto;
     private UserUpdateDto userUpdateDto;
-    private UUID testUserId;
+    private Long testUserId;
 
     @BeforeEach
     void setUp() {
-        testUserId = UUID.randomUUID();
+        testUserId = 1L;
         
         testUserEntity = UserEntity.builder()
                 .id(testUserId)
