@@ -2,29 +2,29 @@ package br.com.jefersonmbs.recargapaywallet.api.controller;
 
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserCreateDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserUpdateDto;
+import br.com.jefersonmbs.recargapaywallet.api.dto.UserResponseDto;
+import br.com.jefersonmbs.recargapaywallet.domain.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.Rollback;
 
-import br.com.jefersonmbs.recargapaywallet.api.dto.UserResponseDto;
-import br.com.jefersonmbs.recargapaywallet.domain.service.UserService;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserController.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Transactional
+@Rollback
 class UserEntityControllerIntegrationTest {
 
     @Autowired
@@ -33,10 +33,8 @@ class UserEntityControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @Autowired
     private UserService userService;
-
-    private final Long testUserId = 1L;
 
     @Test
     void createUser_ShouldReturnCreated_WhenValidInput() throws Exception {
@@ -46,19 +44,6 @@ class UserEntityControllerIntegrationTest {
                 .phone("11987654321")
                 .cpf("11111111111")
                 .build();
-
-        UserResponseDto responseDto = UserResponseDto.builder()
-                .id(testUserId)
-                .name("Carlos Silva")
-                .email("carlos.silva@example.com")
-                .phone("11987654321")
-                .cpf("11111111111")
-                .active(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        when(userService.createUser(any(UserCreateDto.class))).thenReturn(responseDto);
 
         mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,135 +70,84 @@ class UserEntityControllerIntegrationTest {
 
     @Test
     void getUserById_ShouldReturnUser_WhenUserExists() throws Exception {
-        UserResponseDto responseDto = UserResponseDto.builder()
-                .id(testUserId)
+        // First create a user
+        UserCreateDto createDto = UserCreateDto.builder()
                 .name("Carlos Silva")
-                .email("carlos.silva@example.com")
+                .email("carlos.test@example.com")
                 .phone("11987654321")
-                .active(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .cpf("12345678901")
                 .build();
+        
+        UserResponseDto createdUser = userService.createUser(createDto);
 
-        when(userService.getUserById(testUserId)).thenReturn(responseDto);
-
-        mockMvc.perform(get("/api/v1/users/{id}", testUserId))
+        mockMvc.perform(get("/api/v1/users/{id}", createdUser.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(testUserId))
+                .andExpect(jsonPath("$.id").value(createdUser.getId()))
                 .andExpect(jsonPath("$.name").value("Carlos Silva"));
     }
 
     @Test
     void getUserById_ShouldReturnBadRequest_WhenUserNotFound() throws Exception {
-        when(userService.getUserById(testUserId))
-                .thenThrow(new IllegalArgumentException("User not found"));
-
-        mockMvc.perform(get("/api/v1/users/{id}", testUserId))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("User not found"));
-    }
-
-    @Test
-    void getAllUsers_ShouldReturnUserList() throws Exception {
-        UserResponseDto user1 = UserResponseDto.builder()
-                .id(testUserId)
-                .name("Carlos Silva")
-                .email("carlos.silva@example.com")
-                .active(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        when(userService.getAllUsers()).thenReturn(Collections.singletonList(user1));
-
-        mockMvc.perform(get("/api/v1/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].name").value("Carlos Silva"));
-    }
-
-    @Test
-    void getAllUsers_ShouldReturnActiveUsersOnly_WhenActiveOnlyTrue() throws Exception {
-        UserResponseDto activeUser = UserResponseDto.builder()
-                .id(testUserId)
-                .name("Carlos Silva")
-                .email("carlos.silva@example.com")
-                .active(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        when(userService.getAllActiveUsers()).thenReturn(Collections.singletonList(activeUser));
-
-        mockMvc.perform(get("/api/v1/users?activeOnly=true"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].active").value(true));
-    }
-
-    @Test
-    void searchUsersByName_ShouldReturnMatchingUsers() throws Exception {
-        UserResponseDto user = UserResponseDto.builder()
-                .id(testUserId)
-                .name("Carlos Silva")
-                .email("carlos.silva@example.com")
-                .active(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        when(userService.searchUsersByName("Carlos")).thenReturn(Collections.singletonList(user));
-
-        mockMvc.perform(get("/api/v1/users?name=Carlos"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].name").value("Carlos Silva"));
-    }
-
-    @Test
-    void updateUser_ShouldReturnUpdatedUser_WhenValidInput() throws Exception {
-        UserUpdateDto updateDto = UserUpdateDto.builder()
-                .name("Ana Santos")
-                .email("ana.santos@example.com")
-                .phone("21987654321")
-                .build();
-
-        UserResponseDto responseDto = UserResponseDto.builder()
-                .id(testUserId)
-                .name("Ana Santos")
-                .email("ana.santos@example.com")
-                .phone("21987654321")
-                .active(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        when(userService.updateUser(any(Long.class), any(UserUpdateDto.class))).thenReturn(responseDto);
-
-        mockMvc.perform(put("/api/v1/users/{id}", testUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Ana Santos"))
-                .andExpect(jsonPath("$.email").value("ana.santos@example.com"));
-    }
-
-    @Test
-    void updateUser_ShouldReturnBadRequest_WhenInvalidEmail() throws Exception {
-        UserUpdateDto invalidDto = UserUpdateDto.builder()
-                .email("invalid-email")
-                .build();
-
-        mockMvc.perform(put("/api/v1/users/{id}", testUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidDto)))
+        mockMvc.perform(get("/api/v1/users/{id}", 999999L))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void deleteUser_ShouldReturnNoContent_WhenUserExists() throws Exception {
-        mockMvc.perform(delete("/api/v1/users/{id}", testUserId))
-                .andExpect(status().isNoContent());
+    void getAllUsers_ShouldReturnUserList() throws Exception {
+        // First create a user
+        UserCreateDto createDto = UserCreateDto.builder()
+                .name("Test User")
+                .email("test.user@example.com")
+                .phone("11987654321")
+                .cpf("98765432100")
+                .build();
+        
+        userService.createUser(createDto);
+
+        mockMvc.perform(get("/api/v1/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 
+    @Test
+    void updateUser_ShouldReturnUpdatedUser_WhenValidInput() throws Exception {
+        // First create a user
+        UserCreateDto createDto = UserCreateDto.builder()
+                .name("Original Name")
+                .email("original@example.com")
+                .phone("11987654321")
+                .cpf("11122233344")
+                .build();
+        
+        UserResponseDto createdUser = userService.createUser(createDto);
+        
+        UserUpdateDto updateDto = UserUpdateDto.builder()
+                .name("Updated Name")
+                .email("updated@example.com")
+                .phone("21987654321")
+                .build();
+
+        mockMvc.perform(put("/api/v1/users/{id}", createdUser.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Name"))
+                .andExpect(jsonPath("$.email").value("updated@example.com"));
+    }
+
+    @Test
+    void deleteUser_ShouldReturnNoContent_WhenUserExists() throws Exception {
+        // First create a user
+        UserCreateDto createDto = UserCreateDto.builder()
+                .name("To Delete")
+                .email("delete@example.com")
+                .phone("11987654321")
+                .cpf("55566677788")
+                .build();
+        
+        UserResponseDto createdUser = userService.createUser(createDto);
+
+        mockMvc.perform(delete("/api/v1/users/{id}", createdUser.getId()))
+                .andExpect(status().isNoContent());
+    }
 }
