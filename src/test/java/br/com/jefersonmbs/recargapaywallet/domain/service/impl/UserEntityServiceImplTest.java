@@ -130,10 +130,8 @@ class UserEntityServiceImplTest {
 
     @Test
     void getUserById_ShouldThrowException_WhenUserNotFound() {
-        // Given
         when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThatThrownBy(() -> userService.getUserById(testUserId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("User not found");
