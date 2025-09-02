@@ -8,20 +8,23 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserEntity, UUID> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmail(String email);
 
+    Optional<UserEntity> findByCpf(String cpf);
+
     boolean existsByEmail(String email);
+
+    boolean existsByCpf(String cpf);
 
     @Query("SELECT u FROM UserEntity u WHERE u.active = true")
     List<UserEntity> findAllActive();
 
     @Query("SELECT u FROM UserEntity u WHERE u.active = true AND u.id = :id")
-    Optional<UserEntity> findActiveById(@Param("id") UUID id);
+    Optional<UserEntity> findActiveById(@Param("id") Long id);
 
     @Query("SELECT u FROM UserEntity u WHERE u.active = true AND LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<UserEntity> findActiveByNameContainingIgnoreCase(@Param("name") String name);

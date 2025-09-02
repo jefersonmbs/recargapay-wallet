@@ -5,19 +5,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponseDto {
+public class WalletResponseDto {
 
-    private Long id;
-    private String name;
-    private String email;
-    private String cpf;
-    private String phone;
+    private UUID id;
+    private Long accountNumber;
+    private BigDecimal balance;
+    private Long userId;
+    private String userCpf;
+    private String userName;
     private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

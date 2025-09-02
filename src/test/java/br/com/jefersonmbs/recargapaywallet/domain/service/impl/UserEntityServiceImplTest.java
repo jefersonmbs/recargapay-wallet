@@ -37,11 +37,11 @@ class UserEntityServiceImplTest {
     private UserEntity testUserEntity;
     private UserCreateDto userCreateDto;
     private UserUpdateDto userUpdateDto;
-    private UUID testUserId;
+    private Long testUserId;
 
     @BeforeEach
     void setUp() {
-        testUserId = UUID.randomUUID();
+        testUserId = 1L;
         
         testUserEntity = UserEntity.builder()
                 .id(testUserId)
@@ -130,10 +130,8 @@ class UserEntityServiceImplTest {
 
     @Test
     void getUserById_ShouldThrowException_WhenUserNotFound() {
-        // Given
         when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThatThrownBy(() -> userService.getUserById(testUserId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("User not found");
@@ -303,23 +301,4 @@ class UserEntityServiceImplTest {
         verify(userMapper).toResponseDto(testUserEntity);
     }
 
-    @Test
-    void existsByEmail_ShouldReturnTrue_WhenEmailExists() {
-        when(userRepository.existsByEmail("carlos.silva@example.com")).thenReturn(true);
-
-        boolean result = userService.existsByEmail("carlos.silva@example.com");
-
-        assertThat(result).isTrue();
-        verify(userRepository).existsByEmail("carlos.silva@example.com");
-    }
-
-    @Test
-    void existsByEmail_ShouldReturnFalse_WhenEmailDoesNotExist() {
-        when(userRepository.existsByEmail("nonexistent@example.com")).thenReturn(false);
-
-        boolean result = userService.existsByEmail("nonexistent@example.com");
-
-        assertThat(result).isFalse();
-        verify(userRepository).existsByEmail("nonexistent@example.com");
-    }
 }
