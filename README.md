@@ -30,7 +30,7 @@ Before running the service, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/jefersonmbs/recargapay-wallet.git
 cd recargapay-wallet
 ```
 
