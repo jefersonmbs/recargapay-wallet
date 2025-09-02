@@ -2,18 +2,6 @@
 
 A Spring Boot-based digital wallet service that provides comprehensive financial transaction management with audit capabilities.
 
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Running the Service](#running-the-service)
-- [Testing](#testing)
-- [API Documentation](#api-documentation)
-- [Configuration](#configuration)
-- [Development](#development)
-
 ## 🔍 Overview
 
 The Recarga Pay Digital Wallet API is a robust financial service built with Spring Boot 3.5.5 that enables users to manage digital wallets, perform transactions (deposits, withdrawals, transfers), and maintain comprehensive audit trails. The service implements industry-standard patterns including transaction strategies, comprehensive validation, and audit logging.
@@ -42,7 +30,7 @@ Before running the service, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/jefersonmbs/recargapay-wallet.git
 cd recargapay-wallet
 ```
 
