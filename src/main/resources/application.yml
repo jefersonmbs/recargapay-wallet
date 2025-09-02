@@ -72,16 +72,12 @@ springdoc:
       name: Jeferson
       email: jefersonmartinsbsantos@gmail.com
 
-
-
-
 livenessProbe:
   httpGet:
     path: /actuator/health
     port: 8080
   initialDelaySeconds: 30
   periodSeconds: 10
-
 
 logging:
   level:

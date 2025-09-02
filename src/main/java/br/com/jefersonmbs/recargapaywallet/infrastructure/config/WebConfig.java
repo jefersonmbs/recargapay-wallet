@@ -25,7 +25,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "/health",
                         "/actuator/**",
                         "/swagger-ui/**",
-                        "/api/v*/api-docs/**"
+                        "/api-docs/**",
+                        "/v3/api-docs/**"
+
                 );
         
         log.info("AuditContextInterceptor registered successfully for path patterns: /api/**");
