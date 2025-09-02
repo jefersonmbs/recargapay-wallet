@@ -3,10 +3,14 @@ package br.com.jefersonmbs.recargapaywallet.domain.strategy.impl;
 import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionRequestDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionResponseDto;
 import br.com.jefersonmbs.recargapaywallet.api.mapper.TransactionMapper;
+import br.com.jefersonmbs.recargapaywallet.domain.dto.AuditContext;
+import br.com.jefersonmbs.recargapaywallet.domain.dto.TransactionAuditRequest;
 import br.com.jefersonmbs.recargapaywallet.domain.dto.TransactionCreationRequest;
+import br.com.jefersonmbs.recargapaywallet.domain.entity.TransactionAuditEntity;
 import br.com.jefersonmbs.recargapaywallet.domain.entity.TransactionHistoryEntity;
 import br.com.jefersonmbs.recargapaywallet.domain.entity.TransactionHistoryEntity.TransactionType;
 import br.com.jefersonmbs.recargapaywallet.domain.entity.WalletEntity;
+import br.com.jefersonmbs.recargapaywallet.domain.service.TransactionAuditService;
 import br.com.jefersonmbs.recargapaywallet.domain.service.WalletFinderService;
 import br.com.jefersonmbs.recargapaywallet.domain.service.WalletBalanceService;
 import br.com.jefersonmbs.recargapaywallet.domain.service.TransactionHistoryService;
@@ -17,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 
 @Slf4j
@@ -30,6 +35,7 @@ public class TransferStrategy implements TransactionStrategy {
     private final WalletFinderService walletFinderService;
     private final WalletBalanceService walletBalanceService;
     private final TransactionHistoryService transactionHistoryService;
+    private final TransactionAuditService transactionAuditService;
     private final WalletValidator walletValidator;
     private final TransactionMapper transactionMapper;
     
@@ -50,21 +56,121 @@ public class TransferStrategy implements TransactionStrategy {
         walletValidator.validateSufficientBalance(sourceBalanceBefore, request.getAmount());
         
         BigDecimal targetBalanceBefore = targetWallet.getBalance();
-        BigDecimal sourceBalanceAfter = sourceBalanceBefore.subtract(request.getAmount());
-        BigDecimal targetBalanceAfter = targetBalanceBefore.add(request.getAmount());
+        UUID transferOutTransactionId = UUID.randomUUID(); 
+        UUID transferInTransactionId = UUID.randomUUID();  
         
-        executeTransfer(sourceWallet, targetWallet, sourceBalanceAfter, targetBalanceAfter);
+        TransactionAuditRequest transferOutRequest = TransactionAuditRequest.initiated(
+            transferOutTransactionId,
+            sourceWallet.getId(),
+            sourceWallet.getUser().getId(),
+            TransactionAuditEntity.OperationType.TRANSFER_OUT,
+            request.getAmount(),
+            sourceBalanceBefore,
+            "Transfer out initiated"
+        );
+        AuditContext auditContext = AuditContext.capture();
         
-        TransactionHistoryEntity transferOut = createTransferOutTransaction(
-            request, sourceWallet, targetWallet, sourceBalanceBefore, sourceBalanceAfter);
+        transactionAuditService.auditTransactionStart(transferOutRequest, auditContext);
         
-        createTransferInTransaction(
-            request, sourceWallet, targetWallet, targetBalanceBefore, targetBalanceAfter);
+        TransactionAuditRequest transferInRequest = TransactionAuditRequest.initiated(
+            transferInTransactionId,
+            targetWallet.getId(),
+            targetWallet.getUser().getId(),
+            TransactionAuditEntity.OperationType.TRANSFER_IN,
+            request.getAmount(),
+            targetBalanceBefore,
+            "Transfer in initiated"
+        );
         
-        log.info("Transfer completed successfully. Transaction ID: {}", transferOut.getId());
-        return transactionMapper.toResponseDto(transferOut);
+        transactionAuditService.auditTransactionStart(transferInRequest, auditContext);
+        
+        try {
+            BigDecimal sourceBalanceAfter = sourceBalanceBefore.subtract(request.getAmount());
+            BigDecimal targetBalanceAfter = targetBalanceBefore.add(request.getAmount());
+            
+            executeTransfer(sourceWallet, targetWallet, sourceBalanceAfter, targetBalanceAfter);
+            
+            TransactionHistoryEntity transferOut = createTransferOutTransaction(
+                request, sourceWallet, targetWallet, sourceBalanceBefore, sourceBalanceAfter, request.getCorrelationId());
+
+            TransactionAuditRequest transferOutSuccessRequest = getAuditRequest(request, transferOutTransactionId, sourceWallet, sourceBalanceBefore, sourceBalanceAfter);
+
+            transactionAuditService.auditSuccessful(transferOutSuccessRequest, auditContext);
+
+            TransactionAuditRequest transferInSuccessRequest = getTransactionAuditRequest(request, transferInTransactionId, targetWallet, targetBalanceBefore, targetBalanceAfter);
+
+            transactionAuditService.auditSuccessful(transferInSuccessRequest, auditContext);
+            
+            log.info("Transfer completed successfully. Transfer-out ID: {}, Transfer-in ID: {}", 
+                transferOutTransactionId, transferInTransactionId);
+            return transactionMapper.toResponseDto(transferOut);
+            
+        } catch (Exception ex) {
+            log.error("Transfer failed from wallet ID: {} to target, amount: {}, error: {}", 
+                request.getSourceWalletId(), request.getAmount(), ex.getMessage(), ex);
+
+            TransactionAuditRequest transferOutFailedRequest = getAuditRequest(request, ex, transferOutTransactionId, sourceWallet, sourceBalanceBefore);
+
+            transactionAuditService.auditFailed(transferOutFailedRequest, auditContext);
+
+            TransactionAuditRequest transferInFailedRequest = getTransactionAuditRequest(request, ex, transferInTransactionId, targetWallet, targetBalanceBefore);
+
+            transactionAuditService.auditFailed(transferInFailedRequest, auditContext);
+            
+            throw ex;
+        }
     }
-    
+
+    private static TransactionAuditRequest getAuditRequest(TransactionRequestDto request, UUID transferOutTransactionId, WalletEntity sourceWallet, BigDecimal sourceBalanceBefore, BigDecimal sourceBalanceAfter) {
+        return TransactionAuditRequest.successful(
+                transferOutTransactionId,
+            sourceWallet.getId(),
+            sourceWallet.getUser().getId(),
+            TransactionAuditEntity.OperationType.TRANSFER_OUT,
+            request.getAmount(),
+                sourceBalanceBefore,
+                sourceBalanceAfter,
+            "Transfer out completed successfully"
+        );
+    }
+
+    private static TransactionAuditRequest getTransactionAuditRequest(TransactionRequestDto request, UUID transferInTransactionId, WalletEntity targetWallet, BigDecimal targetBalanceBefore, BigDecimal targetBalanceAfter) {
+        return TransactionAuditRequest.successful(
+                transferInTransactionId,
+            targetWallet.getId(),
+            targetWallet.getUser().getId(),
+            TransactionAuditEntity.OperationType.TRANSFER_IN,
+            request.getAmount(),
+                targetBalanceBefore,
+                targetBalanceAfter,
+            "Transfer in completed successfully"
+        );
+    }
+
+    private static TransactionAuditRequest getAuditRequest(TransactionRequestDto request, Exception ex, UUID transferOutTransactionId, WalletEntity sourceWallet, BigDecimal sourceBalanceBefore) {
+        return TransactionAuditRequest.failed(
+                transferOutTransactionId,
+            sourceWallet.getId(),
+            sourceWallet.getUser().getId(),
+            TransactionAuditEntity.OperationType.TRANSFER_OUT,
+            request.getAmount(),
+                sourceBalanceBefore,
+            "Transfer out failed: " + ex.getMessage()
+        );
+    }
+
+    private static TransactionAuditRequest getTransactionAuditRequest(TransactionRequestDto request, Exception ex, UUID transferInTransactionId, WalletEntity targetWallet, BigDecimal targetBalanceBefore) {
+        return TransactionAuditRequest.failed(
+                transferInTransactionId,
+            targetWallet.getId(),
+            targetWallet.getUser().getId(),
+            TransactionAuditEntity.OperationType.TRANSFER_IN,
+            request.getAmount(),
+                targetBalanceBefore,
+            "Transfer in failed: " + ex.getMessage()
+        );
+    }
+
     private void validateTransferWallets(WalletEntity sourceWallet, WalletEntity targetWallet) {
         walletValidator.validateWalletForTransaction(sourceWallet, SOURCE_WALLET_INACTIVE_MESSAGE);
         walletValidator.validateWalletForTransaction(targetWallet, TARGET_WALLET_INACTIVE_MESSAGE);
@@ -81,7 +187,8 @@ public class TransferStrategy implements TransactionStrategy {
                                                                  WalletEntity sourceWallet, 
                                                                  WalletEntity targetWallet,
                                                                  BigDecimal sourceBalanceBefore,
-                                                                 BigDecimal sourceBalanceAfter) {
+                                                                 BigDecimal sourceBalanceAfter,
+                                                                 String correlationId) {
         TransactionCreationRequest transactionRequest = TransactionCreationRequest.builder()
             .type(TransactionType.TRANSFER_OUT)
             .amount(request.getAmount())
@@ -90,26 +197,10 @@ public class TransferStrategy implements TransactionStrategy {
             .description(request.getDescription())
             .balanceBefore(sourceBalanceBefore)
             .balanceAfter(sourceBalanceAfter)
+            .correlationId(correlationId)
             .build();
         
         return transactionHistoryService.createTransaction(transactionRequest);
     }
-    
-    private void createTransferInTransaction(TransactionRequestDto request,
-                                           WalletEntity sourceWallet,
-                                           WalletEntity targetWallet,
-                                           BigDecimal targetBalanceBefore,
-                                           BigDecimal targetBalanceAfter) {
-        TransactionCreationRequest transactionRequest = TransactionCreationRequest.builder()
-            .type(TransactionType.TRANSFER_IN)
-            .amount(request.getAmount())
-            .sourceWallet(sourceWallet)
-            .targetWallet(targetWallet)
-            .description(request.getDescription())
-            .balanceBefore(targetBalanceBefore)
-            .balanceAfter(targetBalanceAfter)
-            .build();
-        
-        transactionHistoryService.createTransaction(transactionRequest);
-    }
+
 }

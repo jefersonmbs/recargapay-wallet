@@ -57,7 +57,8 @@ class TransactionHistoryServiceImplTest {
             targetWallet,
             "Test transfer transaction",
             BigDecimal.valueOf(1000.00),
-            BigDecimal.valueOf(900.00)
+            BigDecimal.valueOf(900.00),
+            UUID.randomUUID().toString()
         );
 
         savedTransaction = TransactionHistoryEntity.builder()
@@ -100,7 +101,8 @@ class TransactionHistoryServiceImplTest {
             targetWallet,
             "Deposit transaction",
             BigDecimal.valueOf(500.00),
-            BigDecimal.valueOf(700.00)
+            BigDecimal.valueOf(700.00),
+            UUID.randomUUID().toString()
         );
 
         TransactionHistoryEntity depositTransaction = TransactionHistoryEntity.builder()
@@ -140,7 +142,8 @@ class TransactionHistoryServiceImplTest {
             null,
             "Withdrawal transaction",
             BigDecimal.valueOf(1000.00),
-            BigDecimal.valueOf(850.00)
+            BigDecimal.valueOf(850.00),
+            UUID.randomUUID().toString()
         );
 
         TransactionHistoryEntity withdrawTransaction = TransactionHistoryEntity.builder()
@@ -179,7 +182,8 @@ class TransactionHistoryServiceImplTest {
             targetWallet,
             null,
             BigDecimal.valueOf(1000.00),
-            BigDecimal.valueOf(900.00)
+            BigDecimal.valueOf(900.00),
+            UUID.randomUUID().toString()
         );
 
         TransactionHistoryEntity transactionWithoutDescription = TransactionHistoryEntity.builder()
@@ -217,7 +221,8 @@ class TransactionHistoryServiceImplTest {
             targetWallet,
             "Transfer out transaction",
             BigDecimal.valueOf(1000.00),
-            BigDecimal.valueOf(750.00)
+            BigDecimal.valueOf(750.00),
+            UUID.randomUUID().toString()
         );
 
         TransactionHistoryEntity transferOutTransaction = TransactionHistoryEntity.builder()
@@ -255,7 +260,8 @@ class TransactionHistoryServiceImplTest {
             targetWallet,
             "Transfer in transaction",
             BigDecimal.valueOf(500.00),
-            BigDecimal.valueOf(800.00)
+            BigDecimal.valueOf(800.00),
+            UUID.randomUUID().toString()
         );
 
         TransactionHistoryEntity transferInTransaction = TransactionHistoryEntity.builder()
@@ -293,7 +299,8 @@ class TransactionHistoryServiceImplTest {
             null,
             "Complete withdrawal",
             BigDecimal.valueOf(1000.00),
-            BigDecimal.ZERO
+            BigDecimal.ZERO,
+            UUID.randomUUID().toString()
         );
 
         TransactionHistoryEntity zeroBalanceTransaction = TransactionHistoryEntity.builder()

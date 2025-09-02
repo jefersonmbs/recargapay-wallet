@@ -48,24 +48,33 @@ public class WalletController implements WalletControllerApi {
 
     @PostMapping("/deposit")
     public ResponseEntity<TransactionResponseDto> deposit(@Valid @RequestBody TransactionRequestDto transactionRequest) {
-        log.info("REST request to process deposit of {} to wallet ID: {}", 
-            transactionRequest.getAmount(), transactionRequest.getTargetWalletId());
+        String correlationId = UUID.randomUUID().toString();
+        transactionRequest.setCorrelationId(correlationId);
+        
+        log.info("REST request to process deposit of {} to wallet ID: {} [correlationId={}]", 
+            transactionRequest.getAmount(), transactionRequest.getTargetWalletId(), correlationId);
         
         return ResponseEntity.ok(walletService.deposit(transactionRequest));
     }
 
     @PostMapping("/withdraw")
     public ResponseEntity<TransactionResponseDto> withdraw(@Valid @RequestBody TransactionRequestDto transactionRequest) {
-        log.info("REST request to process withdrawal of {} from wallet ID: {}", 
-            transactionRequest.getAmount(), transactionRequest.getSourceWalletId());
+        String correlationId = UUID.randomUUID().toString();
+        transactionRequest.setCorrelationId(correlationId);
+        
+        log.info("REST request to process withdrawal of {} from wallet ID: {} [correlationId={}]", 
+            transactionRequest.getAmount(), transactionRequest.getSourceWalletId(), correlationId);
         
         return ResponseEntity.ok(walletService.withdraw(transactionRequest));
     }
 
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponseDto> transfer(@Valid @RequestBody TransactionRequestDto transactionRequest) {
-        log.info("REST request to process transfer of {} from wallet ID: {} to target", 
-            transactionRequest.getAmount(), transactionRequest.getSourceWalletId());
+        String correlationId = UUID.randomUUID().toString();
+        transactionRequest.setCorrelationId(correlationId);
+        
+        log.info("REST request to process transfer of {} from wallet ID: {} to target [correlationId={}]", 
+            transactionRequest.getAmount(), transactionRequest.getSourceWalletId(), correlationId);
         
         return ResponseEntity.ok(walletService.transfer(transactionRequest));
     }
