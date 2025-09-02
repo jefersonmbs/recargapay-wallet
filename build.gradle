@@ -5,6 +5,9 @@ plugins {
     id 'org.hibernate.orm' version '6.6.26.Final'
     id 'org.graalvm.buildtools.native' version '0.10.6'
 }
+ext {
+    springCloudVersion = "2025.0.0"
+}
 
 group = 'br.com.jefersonmbs'
 version = '0.0.1-SNAPSHOT'
@@ -34,6 +37,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
@@ -48,6 +52,11 @@ dependencies {
 hibernate {
     enhancement {
         enableAssociationManagement = true
+    }
+}
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
     }
 }
 

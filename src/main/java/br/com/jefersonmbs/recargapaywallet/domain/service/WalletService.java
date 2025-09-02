@@ -1,5 +1,7 @@
 package br.com.jefersonmbs.recargapaywallet.domain.service;
 
+import br.com.jefersonmbs.recargapaywallet.api.dto.PagedTransactionResponseDto;
+import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionHistoryRequestDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionRequestDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionResponseDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.WalletResponseDto;
@@ -11,12 +13,6 @@ public interface WalletService {
 
     WalletResponseDto createWallet(Long userId);
 
-    WalletResponseDto getWalletById(UUID walletId);
-
-    WalletResponseDto getWalletByUserId(Long userId);
-
-    WalletResponseDto getWalletByUserCpf(String cpf);
-
     WalletResponseDto getWalletByAccountNumber(Long accountNumber);
 
     List<WalletResponseDto> getAllActiveWallets();
@@ -27,10 +23,8 @@ public interface WalletService {
 
     TransactionResponseDto transfer(TransactionRequestDto transactionRequest);
 
-    List<TransactionResponseDto> getTransactionHistory(UUID walletId, Long userId);
-
-    List<TransactionResponseDto> getTransactionHistoryByCpf(String cpf);
-
+    PagedTransactionResponseDto getTransactionHistoryPaginated(UUID walletId, Long userId, TransactionHistoryRequestDto request);
+    
     void toggleActiveWallet(UUID walletId);
 
 }

@@ -1,6 +1,7 @@
 package br.com.jefersonmbs.recargapaywallet.api.dto;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +20,9 @@ public class UserUpdateDto {
     @Email(message = "Email must be valid")
     @Size(max = 150, message = "Email must not exceed 150 characters")
     private String email;
+
+    @Pattern(regexp = "\\d{11}", message = "CPF must contain exactly 11 digits")
+    private String cpf;
 
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     private String phone;

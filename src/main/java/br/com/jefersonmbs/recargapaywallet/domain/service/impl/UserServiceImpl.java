@@ -7,23 +7,30 @@ import br.com.jefersonmbs.recargapaywallet.api.mapper.UserMapper;
 import br.com.jefersonmbs.recargapaywallet.domain.entity.UserEntity;
 import br.com.jefersonmbs.recargapaywallet.domain.repository.UserRepository;
 import br.com.jefersonmbs.recargapaywallet.domain.service.UserService;
-import lombok.RequiredArgsConstructor;
+import br.com.jefersonmbs.recargapaywallet.domain.service.WalletService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final WalletService walletService;
+
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, @Lazy WalletService walletService) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+        this.walletService = walletService;
+    }
 
     @Override
     public UserResponseDto createUser(UserCreateDto userCreateDto) {
@@ -33,17 +40,29 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("User with email " + userCreateDto.getEmail() + " already exists");
         }
 
+        if (userRepository.existsByCpf(userCreateDto.getCpf())) {
+            throw new IllegalArgumentException("User with CPF " + userCreateDto.getCpf() + " already exists");
+        }
+
         UserEntity userEntity = userMapper.toEntity(userCreateDto);
 
         UserEntity savedUserEntity = userRepository.save(userEntity);
         log.info("User created successfully with ID: {}", savedUserEntity.getId());
+        if(Objects.nonNull(userCreateDto.getAutoCreateWallet()) && userCreateDto.getAutoCreateWallet()) {
+            try {
+                walletService.createWallet(savedUserEntity.getId());
+                log.info("Wallet created automatically for user ID: {}", savedUserEntity.getId());
+            } catch (Exception e) {
+                log.error("Failed to create wallet for user ID: {}. Error: {}", savedUserEntity.getId(), e.getMessage());
+            }
+        }
         
         return userMapper.toResponseDto(savedUserEntity);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponseDto getUserById(UUID id) {
+    public UserResponseDto getUserById(Long id) {
         log.info("Fetching user with ID: {}", id);
         
         UserEntity userEntity = userRepository.findById(id)
@@ -75,7 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto updateUser(UUID id, UserUpdateDto userUpdateDto) {
+    public UserResponseDto updateUser(Long id, UserUpdateDto userUpdateDto) {
         log.info("Updating user with ID: {}", id);
         
         UserEntity existingUserEntity = userRepository.findById(id)
@@ -95,7 +114,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(UUID id) {
+    public void deleteUser(Long id) {
         log.info("Deleting user with ID: {}", id);
         
         if (!userRepository.existsById(id)) {
@@ -107,7 +126,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void toggleActiveUser(UUID id) {
+    public void toggleActiveUser(Long id) {
         log.info("Toggling active status for user with ID: {}", id);
         
         UserEntity userEntity = userRepository.findById(id)
@@ -128,12 +147,6 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(userMapper::toResponseDto)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
     }
 
 }

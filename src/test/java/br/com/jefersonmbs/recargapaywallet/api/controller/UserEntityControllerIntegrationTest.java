@@ -216,22 +216,4 @@ class UserEntityControllerIntegrationTest {
                 .andExpect(status().isNoContent());
     }
 
-
-    @Test
-    void checkEmailExists_ShouldReturnTrue_WhenEmailExists() throws Exception {
-        when(userService.existsByEmail(anyString())).thenReturn(true);
-
-        mockMvc.perform(get("/api/v1/users/exists?email=carlos.silva@example.com"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("true"));
-    }
-
-    @Test
-    void checkEmailExists_ShouldReturnFalse_WhenEmailDoesNotExist() throws Exception {
-        when(userService.existsByEmail(anyString())).thenReturn(false);
-
-        mockMvc.perform(get("/api/v1/users/exists?email=nonexistent@example.com"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("false"));
-    }
 }

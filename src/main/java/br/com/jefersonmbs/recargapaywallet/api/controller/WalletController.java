@@ -1,5 +1,7 @@
 package br.com.jefersonmbs.recargapaywallet.api.controller;
 
+import br.com.jefersonmbs.recargapaywallet.api.dto.PagedTransactionResponseDto;
+import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionHistoryRequestDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionRequestDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionResponseDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.WalletResponseDto;
@@ -11,8 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Slf4j
 @RestController
@@ -26,27 +30,6 @@ public class WalletController implements WalletControllerApi {
     public ResponseEntity<WalletResponseDto> createWallet(@RequestParam Long userId) {
         log.info("REST request to create wallet for user ID: {}", userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(walletService.createWallet(userId));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<WalletResponseDto> getWalletById(@PathVariable UUID id) {
-        log.info("REST request to get wallet by ID: {}", id);
-
-        return ResponseEntity.ok(walletService.getWalletById(id));
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<WalletResponseDto> getWalletByUserId(@PathVariable Long userId) {
-        log.info("REST request to get wallet by user ID: {}", userId);
-
-        return ResponseEntity.ok(walletService.getWalletByUserId(userId));
-    }
-
-    @GetMapping("/cpf/{cpf}")
-    public ResponseEntity<WalletResponseDto> getWalletByUserCpf(@PathVariable String cpf) {
-        log.info("REST request to get wallet by user CPF: {}", cpf);
-
-        return ResponseEntity.ok(walletService.getWalletByUserCpf(cpf));
     }
 
     @GetMapping("/account/{accountNumber}")
@@ -87,18 +70,29 @@ public class WalletController implements WalletControllerApi {
         return ResponseEntity.ok(walletService.transfer(transactionRequest));
     }
 
-    @GetMapping("/{walletId}/transactions")
-    public ResponseEntity<List<TransactionResponseDto>> getTransactionHistory(@PathVariable UUID walletId, @PathVariable Long userId) {
-        log.info("REST request to get transaction history for wallet ID and User ID: {} , {}", walletId,userId);
+    @GetMapping("/{walletId}/{userId}/transactions")
+    public ResponseEntity<PagedTransactionResponseDto> getTransactionHistory(
+            @PathVariable UUID walletId, 
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "20") Integer size,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
         
-        return ResponseEntity.ok(walletService.getTransactionHistory(walletId,userId));
-    }
-
-    @GetMapping("/transactions/cpf/{cpf}")
-    public ResponseEntity<List<TransactionResponseDto>> getTransactionHistoryByCpf(@PathVariable String cpf) {
-        log.info("REST request to get transaction history for user CPF: {}", cpf);
+        TransactionHistoryRequestDto request = TransactionHistoryRequestDto.builder()
+                .page(page)
+                .size(size)
+                .startDate(startDate)
+                .endDate(endDate)
+                .sortBy(sortBy)
+                .sortDirection(sortDirection)
+                .build();
+                
+        log.info("REST request to get paginated transaction history for wallet ID and User ID: {} , {} with filters: {}", walletId, userId, request);
         
-        return ResponseEntity.ok(walletService.getTransactionHistoryByCpf(cpf));
+        return ResponseEntity.ok(walletService.getTransactionHistoryPaginated(walletId, userId, request));
     }
 
     @PatchMapping("/{id}/toggle-active")

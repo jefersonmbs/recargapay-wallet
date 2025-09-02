@@ -69,7 +69,8 @@ public class TransactionHistoryEntity {
         DEPOSIT,
         WITHDRAWAL,
         TRANSFER_OUT,
-        TRANSFER_IN
+        TRANSFER_IN,
+        TRANSFER
     }
 
     public enum TransactionStatus {

@@ -5,25 +5,23 @@ import br.com.jefersonmbs.recargapaywallet.api.dto.UserResponseDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.UserUpdateDto;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface UserService {
 
     UserResponseDto createUser(UserCreateDto userCreateDto);
 
-    UserResponseDto getUserById(UUID id);
+    UserResponseDto getUserById(Long id);
 
     List<UserResponseDto> getAllUsers();
 
     List<UserResponseDto> getAllActiveUsers();
 
-    UserResponseDto updateUser(UUID id, UserUpdateDto userUpdateDto);
+    UserResponseDto updateUser(Long id, UserUpdateDto userUpdateDto);
 
-    void deleteUser(UUID id);
+    void deleteUser(Long id);
 
-    void toggleActiveUser(UUID id);
+    void toggleActiveUser(Long id);
 
     List<UserResponseDto> searchUsersByName(String name);
 
-    boolean existsByEmail(String email);
 }

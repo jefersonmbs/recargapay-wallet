@@ -3,19 +3,21 @@ package br.com.jefersonmbs.recargapaywallet.domain.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.LazyToOne;
+import org.hibernate.annotations.LazyToOneOption;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "tb_users")
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,9 +25,9 @@ import java.util.UUID;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false, nullable = false)
-    private UUID id;
+    private Long id;
 
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
@@ -37,6 +39,11 @@ public class UserEntity {
     @Size(max = 150, message = "Email must not exceed 150 characters")
     @Column(nullable = false, unique = true, length = 150)
     private String email;
+
+    @NotBlank(message = "CPF is required")
+    @Pattern(regexp = "\\d{11}", message = "CPF must contain exactly 11 digits")
+    @Column(nullable = false, unique = true, length = 11)
+    private String cpf;
 
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     @Column(length = 20)
@@ -53,4 +60,7 @@ public class UserEntity {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private WalletEntity wallet;
 }

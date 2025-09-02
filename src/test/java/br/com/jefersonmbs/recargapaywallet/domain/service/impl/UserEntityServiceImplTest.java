@@ -303,23 +303,4 @@ class UserEntityServiceImplTest {
         verify(userMapper).toResponseDto(testUserEntity);
     }
 
-    @Test
-    void existsByEmail_ShouldReturnTrue_WhenEmailExists() {
-        when(userRepository.existsByEmail("carlos.silva@example.com")).thenReturn(true);
-
-        boolean result = userService.existsByEmail("carlos.silva@example.com");
-
-        assertThat(result).isTrue();
-        verify(userRepository).existsByEmail("carlos.silva@example.com");
-    }
-
-    @Test
-    void existsByEmail_ShouldReturnFalse_WhenEmailDoesNotExist() {
-        when(userRepository.existsByEmail("nonexistent@example.com")).thenReturn(false);
-
-        boolean result = userService.existsByEmail("nonexistent@example.com");
-
-        assertThat(result).isFalse();
-        verify(userRepository).existsByEmail("nonexistent@example.com");
-    }
 }
