@@ -15,6 +15,30 @@ services:
     networks:
       - recargapay-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recargapay_wallet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  recargapay-wallet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: recargapay-wallet-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/recargapay_wallet
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+    networks:
+      - recargapay-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:

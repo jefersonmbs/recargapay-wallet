@@ -41,6 +41,22 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  health:
+    circuitbreakers:
+      enabled: true
+    db:
+      enabled: true
+
 springdoc:
   api-docs:
     path: /api-docs
@@ -55,6 +71,17 @@ springdoc:
     contact:
       name: Jeferson
       email: jefersonmartinsbsantos@gmail.com
+
+
+
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
 
 logging:
   level:
