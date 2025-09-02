@@ -1,0 +1,461 @@
+type: collection.insomnia.rest/5.0
+name: Recarga Pay Digital Wallet API
+meta:
+  id: wrk_f6715eaae7054ecb9ab056951a4bc48d
+  created: 1756844702967
+  modified: 1756844702967
+  description: ""
+collection:
+  - name: Users
+    meta:
+      id: fld_5d7ba166a7ac4634a2f6a06beff3d561
+      created: 1756844702971
+      modified: 1756844702971
+      sortKey: -2000
+      description: Endpoints relacionados ao gerenciamento de usuários
+    children:
+      - url: "{{ base_url }}/api/v1/users"
+        name: Criar Usuário
+        meta:
+          id: req_79f8b3c1cca44b8dbde5d4be205f7666
+          created: 1756844702975
+          modified: 1756845359729
+          isPrivate: false
+          description: Cria um novo usuário no sistema
+          sortKey: -2400
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "Carlos Silva Santos",
+              "email": "carlos.silva.santos@example.com",
+              "phone": "11987654321",
+            	"cpf": "44444444444"
+            }
+        headers:
+          - id: pair_content_type
+            name: Content-Type
+            value: application/json
+          - id: pair_correlation_id
+            name: X-Correlation-ID
+            value: "{{ correlation_id }}"
+            description: ID de correlação para rastreamento de auditoria
+          - id: pair_forwarded_for
+            name: X-Forwarded-For
+            value: "{{ client_ip }}"
+            description: IP do cliente para auditoria
+          - id: pair_real_ip
+            name: X-Real-IP
+            value: "{{ client_ip }}"
+            description: IP real do cliente
+          - id: pair_user_agent
+            name: User-Agent
+            value: "{{ user_agent }}"
+            description: User Agent para auditoria
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/v1/users/"
+        name: 2. Buscar Usuário por ID
+        meta:
+          id: req_f7417aa97e0844aea5c016a9338f4eb1
+          created: 1756844702977
+          modified: 1756845339511
+          isPrivate: false
+          description: Busca um usuário específico pelo seu ID
+          sortKey: -2350
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/v1/users"
+        name: 3. Listar Todos os Usuários
+        meta:
+          id: req_d586efa184474ec394b02ec405f87d27
+          created: 1756844702978
+          modified: 1756845326672
+          isPrivate: false
+          description: Lista todos os usuários do sistema
+          sortKey: -2325
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/v1/users"
+        name: 4. Listar Usuários Ativos
+        meta:
+          id: req_b6dfeee5c50f41429a3a3825494fbdfe
+          created: 1756844702979
+          modified: 1756844725370
+          isPrivate: false
+          description: Lista apenas usuários ativos do sistema
+          sortKey: -2300
+        method: GET
+        parameters:
+          - id: pair_active_only
+            name: activeOnly
+            value: "true"
+            description: Filtrar apenas usuários ativos
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/v1/users"
+        name: 5. Buscar Usuários por Nome
+        meta:
+          id: req_e18870b2eb1d47c0bf112c050d18b769
+          created: 1756844702980
+          modified: 1756844727572
+          isPrivate: false
+          description: Busca usuários que contenham o nome especificado
+          sortKey: -2250
+        method: GET
+        parameters:
+          - id: pair_name_search
+            name: name
+            value: Carlos
+            description: Nome para busca
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/v1/users/{{ user_id }}"
+        name: 6. Atualizar Usuário
+        meta:
+          id: req_233ad46265f8489482a02efbce3c66f0
+          created: 1756844702981
+          modified: 1756844729364
+          isPrivate: false
+          description: Atualiza os dados de um usuário existente
+          sortKey: -2225
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "Ana Santos",
+              "email": "ana.santos@example.com",
+              "phone": "21987654321",
+              "active": true
+            }
+        headers:
+          - id: pair_content_type
+            name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/v1/users/{{ user_id }}"
+        name: 7. Excluir Usuário
+        meta:
+          id: req_209684b2e114499ca7e1c2f5aad82704
+          created: 1756844702982
+          modified: 1756844731206
+          isPrivate: false
+          description: Remove permanentemente um usuário do sistema
+          sortKey: -2212.5
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/api/v1/users/{{ user_id }}/toggle-active"
+        name: 8. Alternar Status do Usuário
+        meta:
+          id: req_df1303f8ea844974935c72d307905d3b
+          created: 1756844702984
+          modified: 1756845300166
+          isPrivate: false
+          description: Alterna o status ativo/inativo de um usuário
+          sortKey: -2050
+        method: PATCH
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Wallets
+    meta:
+      id: fld_b167440cca784c2db3d2315a34b43415
+      created: 1756844702974
+      modified: 1756844702974
+      sortKey: -1000
+      description: Endpoints relacionados ao gerenciamento de carteiras e transações
+  - url: "{{ base_url }}/api/v1/wallets?userId=3"
+    name: 9. Criar Carteira
+    meta:
+      id: req_6835f776f8f64d4c8baf532987206fb1
+      created: 1756844702985
+      modified: 1756845369186
+      isPrivate: false
+      description: Cria uma nova carteira para um usuário
+      sortKey: -300
+    method: POST
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ base_url }}/api/v1/wallets"
+    name: 11. Listar Carteiras Ativas
+    meta:
+      id: req_5eec28d7484b4b2f9111eae4ff01f844
+      created: 1756844702986
+      modified: 1756844702986
+      isPrivate: false
+      description: Lista todas as carteiras ativas do sistema
+      sortKey: -100
+    method: GET
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ base_url }}/api/v1/wallets/account/1"
+    name: 10. Buscar Carteira por Número da Conta
+    meta:
+      id: req_c0ca09f5a7ba43768a684ec6b6418717
+      created: 1756844702986
+      modified: 1756845787063
+      isPrivate: false
+      description: Busca uma carteira pelo número da conta
+      sortKey: -200
+    method: GET
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ base_url }}/api/v1/wallets/deposit"
+    name: 12. Realizar Depósito
+    meta:
+      id: req_1092484f9d954a74923e85e38f7078e2
+      created: 1756844702987
+      modified: 1756845407768
+      isPrivate: false
+      description: Deposita um valor em uma carteira
+      sortKey: -90
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "type": "DEPOSIT",
+          "amount": 1000.00,
+          "targetWalletId": "5f86342f-6b83-4ade-91ba-3b7e89b5674a",
+          "description": "Depósito 1"
+        }
+    headers:
+      - id: pair_content_type
+        name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ base_url }}/api/v1/wallets/withdraw"
+    name: 13. Realizar Saque
+    meta:
+      id: req_7e6fd73134e741ffb5cd67d95574085b
+      created: 1756844702988
+      modified: 1756845818099
+      isPrivate: false
+      description: Saca um valor de uma carteira
+      sortKey: -80
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "type": "WITHDRAWAL",
+          "amount": 50.00,
+          "sourceWalletId": "5f86342f-6b83-4ade-91ba-3b7e89b5674a",
+          "description": "Saque de exemplo"
+        }
+    headers:
+      - id: pair_content_type
+        name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ base_url }}/api/v1/wallets/transfer"
+    name: 14. Realizar Transferência
+    meta:
+      id: req_bf88213063ab4551a3aaf377dfa00138
+      created: 1756844702989
+      modified: 1756845830084
+      isPrivate: false
+      description: Transfere um valor entre carteiras
+      sortKey: -70
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "type": "TRANSFER",
+          "amount": 25.00,
+          "sourceWalletId": "5f86342f-6b83-4ade-91ba-3b7e89b5674a",
+          "targetUserCpf": "98765432100",
+          "description": "Transferência de exemplo"
+        }
+    headers:
+      - id: pair_content_type
+        name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ base_url }}/api/v1/wallets/{{ wallet_id }}/{{ user_id }}/transactions"
+    name: 15. Histórico de Transações (Paginado)
+    meta:
+      id: req_f3983de27abd4ae98404d975b936fffa
+      created: 1756844702990
+      modified: 1756844702990
+      isPrivate: false
+      description: Busca o histórico paginado de transações de uma carteira com
+        filtros opcionais
+      sortKey: -60
+    method: GET
+    parameters:
+      - id: pair_page
+        name: page
+        value: "0"
+        description: Número da página
+      - id: pair_size
+        name: size
+        value: "20"
+        description: Tamanho da página
+      - id: pair_start_date
+        name: startDate
+        value: ""
+        description: Data de início (YYYY-MM-DD)
+      - id: pair_end_date
+        name: endDate
+        value: ""
+        description: Data de fim (YYYY-MM-DD)
+      - id: pair_sort_by
+        name: sortBy
+        value: createdAt
+        description: Campo para ordenação
+      - id: pair_sort_direction
+        name: sortDirection
+        value: DESC
+        description: Direção da ordenação
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ base_url
+      }}/api/v1/wallets/5f86342f-6b83-4ade-91ba-3b7e89b5674a/toggle-active"
+    name: 16. Alternar Status da Carteira
+    meta:
+      id: req_daf131791611433c802e1cab0bcd20be
+      created: 1756844702991
+      modified: 1756845836557
+      isPrivate: false
+      description: Alterna o status ativo/inativo de uma carteira
+      sortKey: -50
+    method: PATCH
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_fcb1bb2f66e44727b5adb9963f2ad710
+    created: 1756844702970
+    modified: 1756845362631
+  cookies:
+    - key: JSESSIONID
+      value: D425E349AFA3B7DA635A285B1299B241
+      domain: localhost
+      path: /
+      httpOnly: true
+      hostOnly: true
+      creation: 2025-09-02T20:36:02.630Z
+      lastAccessed: 2025-09-02T20:36:02.630Z
+      id: d6a7a7f0-4308-412d-99a9-effc167c5562
+environments:
+  name: Base Environment
+  meta:
+    id: env_bfca416f05aa4ea08b281e373107909c
+    created: 1756844702969
+    modified: 1756844702969
+    isPrivate: false
+  data:
+    base_url: http://localhost:8080
+    user_id: "1"
+    wallet_id: 00000000-0000-0000-0000-000000000000
+    account_number: "123456789"
+    correlation_id: CORR-12345678
+    user_agent: Insomnia/2023.5.8
+    client_ip: 127.0.0.1
