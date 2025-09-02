@@ -1,7 +1,6 @@
 package br.com.jefersonmbs.recargapaywallet.api.controller;
 
 import br.com.jefersonmbs.recargapaywallet.api.dto.PagedTransactionResponseDto;
-import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionHistoryRequestDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionRequestDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.TransactionResponseDto;
 import br.com.jefersonmbs.recargapaywallet.api.dto.WalletResponseDto;

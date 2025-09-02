@@ -9,5 +9,5 @@ import java.math.BigDecimal;
 @Builder
 public record TransactionCreationRequest(TransactionType type, BigDecimal amount, WalletEntity sourceWallet,
                                          WalletEntity targetWallet, String description, BigDecimal balanceBefore,
-                                         BigDecimal balanceAfter) {
+                                         BigDecimal balanceAfter, String correlationId) {
 }

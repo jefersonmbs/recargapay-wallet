@@ -23,6 +23,7 @@ public class TransactionHistoryServiceImpl implements TransactionHistoryService 
             .description(request.description())
             .balanceBeforeTransaction(request.balanceBefore())
             .balanceAfterTransaction(request.balanceAfter())
+            .correlationId(request.correlationId())
             .build();
         
         return transactionHistoryRepository.save(transaction);

@@ -7,6 +7,14 @@ spring:
     username: postgres
     password: password
     driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 50
+      connection-timeout: 20000
+      idle-timeout: 300000
+      leak-detection-threshold: 60000
+      validation-timeout: 5000
+
   
   jpa:
     hibernate:
@@ -23,6 +31,10 @@ spring:
             non_contextual_creation: true
         order_inserts: true
         order_updates: true
+
+  transaction:
+    default-timeout: 30s
+
   
   flyway:
     enabled: true

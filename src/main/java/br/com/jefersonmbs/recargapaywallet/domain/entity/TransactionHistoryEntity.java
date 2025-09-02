@@ -65,6 +65,9 @@ public class TransactionHistoryEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "correlation_id", length = 100)
+    private String correlationId;
+
     public enum TransactionType {
         DEPOSIT,
         WITHDRAWAL,
